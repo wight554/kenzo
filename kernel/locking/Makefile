@@ -1,4 +1,3 @@
-
 obj-y += mutex.o semaphore.o rwsem.o lglock.o
 
 ifdef CONFIG_FUNCTION_TRACER
