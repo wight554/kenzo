@@ -63,6 +63,7 @@
  * bitmap_allocate_region(bitmap, pos, order)	Allocate specified bit region
  * bitmap_from_u32array(dst, nbits, buf, nwords) *dst = *buf (nwords 32b words)
  * bitmap_to_u32array(buf, nwords, src, nbits)	*buf = *dst (nwords 32b words)
+ * bitmap_print_to_pagebuf(list, buf, mask, nbits) Print bitmap src as list/hex
  */
 
 /*
@@ -170,6 +171,8 @@ extern void bitmap_copy_le(unsigned long *dst, const unsigned long *src, unsigne
 #define bitmap_copy_le bitmap_copy
 #endif
 extern unsigned int bitmap_ord_to_pos(const unsigned long *bitmap, unsigned int ord, unsigned int nbits);
+extern int bitmap_print_to_pagebuf(bool list, char *buf,
+				   const unsigned long *maskp, int nmaskbits);
 
 #define BITMAP_FIRST_WORD_MASK(start) (~0UL << ((start) & (BITS_PER_LONG - 1)))
 #define BITMAP_LAST_WORD_MASK(nbits) (~0UL >> (-(nbits) & (BITS_PER_LONG - 1)))
