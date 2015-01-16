@@ -259,6 +259,7 @@ int usb_add_gadget_udc_release(struct device *parent, struct usb_gadget *gadget,
 
  err_put_udc:
 	put_device(&udc->dev);
+	device_del(&gadget->dev);
 
  err_put_gadget:
 	put_device(&gadget->dev);
