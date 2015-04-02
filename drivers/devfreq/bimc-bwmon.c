@@ -308,7 +308,6 @@ static void stop_bw_hwmon(struct bw_hwmon *hw)
 {
 	struct bwmon *m = to_bwmon(hw);
 
-	mon_irq_disable(m);
 	free_irq(m->irq, m);
 	mon_disable(m);
 	mon_clear(m);
@@ -319,6 +318,8 @@ static int suspend_bw_hwmon(struct bw_hwmon *hw)
 {
 	struct bwmon *m = to_bwmon(hw);
 
+	free_irq(m->irq, m);
+	mon_disable(m);
 	mon_irq_disable(m);
 	free_irq(m->irq, m);
 	mon_disable(m);
@@ -346,6 +347,15 @@ static int resume_bw_hwmon(struct bw_hwmon *hw)
 
 	mon_irq_enable(m);
 	mon_enable(m);
+
+	ret = request_threaded_irq(m->irq, NULL, bwmon_intr_handler,
+				  IRQF_ONESHOT | IRQF_SHARED,
+				  dev_name(m->dev), m);
+	if (ret) {
+		dev_err(m->dev, "Unable to register interrupt handler! (%d)\n",
+				ret);
+		return ret;
+	}
 
 	return 0;
 }
