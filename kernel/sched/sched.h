@@ -17,6 +17,13 @@
 
 extern __read_mostly int scheduler_running;
 
+struct freq_max_load {
+	struct rcu_head rcu;
+	u32 freqs[0];
+};
+
+extern DEFINE_PER_CPU(struct freq_max_load *, freq_max_load);
+
 /*
  * Helpers for converting nanosecond timing to jiffy resolution
  */
