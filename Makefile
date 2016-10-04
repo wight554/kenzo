@@ -598,6 +598,17 @@ else
 KBUILD_CFLAGS	+= -O2 -finline-functions
 endif
 
+###########################
+# FLASH OPTMIZATION SETUP #
+###########################
+
+# Strip linker
+LDFLAGS		+= --strip-debug -O2
+
+# These flags need a special toolchain so split them off
+KBUILD_CFLAGS	+= $(call cc-option,-mlow-precision-recip-sqrt,) \
+		   $(call cc-option,-mpc-relative-literal-loads,)
+
 # Disable unused-constant-variable warnings
 KBUILD_CFLAGS	+= $(call cc-disable-warning,unused-const-variable,)
 
