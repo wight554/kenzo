@@ -127,6 +127,9 @@
 				<0x4160 0x14 0x1>,
 				<0x0120 0x1F 0x1>;
 
+		/* Enable POPP */
+		qcom,popp-enable;
+
 		qcom,gpu-speed-numplans = <3>;
 		qcom,gpu-speed-plan =
 				<0x0 0x0>,
