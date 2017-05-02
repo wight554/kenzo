@@ -26,6 +26,7 @@
 #include <linux/ktime.h>
 #include <linux/tick.h>
 #include <linux/suspend.h>
+#include <linux/quickwakeup.h>
 #include <linux/pm_qos.h>
 #include <linux/quickwakeup.h>
 #include <linux/of_platform.h>
