@@ -381,7 +381,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -Wno-maybe-u
 		   -g0 -DNDEBUG -fmodulo-sched -fivopts \
 		   -fmodulo-sched-allow-regmoves \
 		   -fno-asynchronous-unwind-tables \
-		   -Wno-format-security \
+		   -Wno-format-security -Wno-format \
 		   -fno-delete-null-pointer-checks \
 		   -Wno-deprecated-declarations \
 		   -Wno-misleading-indentation \
