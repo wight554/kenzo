@@ -43,9 +43,9 @@ struct maple_data {
 
 	/* Settings */
 	int fifo_expire[2][2];
-	int fifo_batch;
-	int writes_starved;
-  int sleep_latency_multiple;
+	int __read_mostly fifo_batch;
+	int __read_mostly writes_starved;
+	int __read_mostly sleep_latency_multiple;
 };
 
 static inline struct maple_data *
