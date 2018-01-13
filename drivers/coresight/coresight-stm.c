@@ -795,7 +795,7 @@ static ssize_t stm_show_entities(struct device *dev,
 	struct stm_drvdata *drvdata = dev_get_drvdata(dev->parent);
 	ssize_t len;
 
-	len = bitmap_scnprintf(buf, PAGE_SIZE, drvdata->entities,
+	len = scnprintf(buf, PAGE_SIZE, drvdata->entities,
 			       OST_ENTITY_MAX);
 
 	if (PAGE_SIZE - len < 2)
