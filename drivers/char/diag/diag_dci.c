@@ -1110,8 +1110,7 @@ void extract_dci_events(unsigned char *buf, int len, int data_source, int token)
 		return;
 	}
 	/*
-	 * Move directly to the start of the event series. 1 byte for
-	 * event code and 2 bytes for the length field.
+	 * 1 byte for event code and 2 bytes for the length field.
 	 * The length field indicates the total length removing the cmd_code
 	 * and the lenght field. The event parsing in that case should happen
 	 * till the end.
