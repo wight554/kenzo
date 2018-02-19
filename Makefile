@@ -381,7 +381,7 @@ KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -Wno-maybe-u
 		   -g0 -DNDEBUG -fmodulo-sched -fivopts \
 		   -fmodulo-sched-allow-regmoves \
 		   -fno-asynchronous-unwind-tables \
-		   -mfix-cortex-a53-843419 \
+		   -mpc-relative-literal-loads \
 		   -mcpu=cortex-a72.cortex-a53+crc+crypto \
 		   -Wno-format-security \
 		   -fno-delete-null-pointer-checks \
