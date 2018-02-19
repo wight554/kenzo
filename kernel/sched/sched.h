@@ -915,10 +915,6 @@ extern unsigned int sched_mostly_idle_load;
 extern unsigned int sched_small_task;
 extern unsigned int sched_upmigrate;
 extern unsigned int sched_downmigrate;
-extern bool sched_use_shadow_scheduling;
-extern bool sched_shadow_active;
-extern unsigned int sched_shadow_upmigrate;
-extern unsigned int sched_shadow_downmigrate;
 extern unsigned int sched_init_task_load_pelt;
 extern unsigned int sched_init_task_load_windows;
 extern unsigned int sched_heavy_task;
@@ -1425,9 +1421,6 @@ static inline int task_on_rq_migrating(struct task_struct *p)
 
 #ifndef prepare_arch_switch
 # define prepare_arch_switch(next)	do { } while (0)
-#endif
-#ifndef finish_arch_switch
-# define finish_arch_switch(prev)	do { } while (0)
 #endif
 #ifndef finish_arch_post_lock_switch
 # define finish_arch_post_lock_switch()	do { } while (0)

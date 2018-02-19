@@ -4417,7 +4417,6 @@ static void finish_task_switch(struct rq *rq, struct task_struct *prev)
 	 */
 	prev_state = prev->state;
 	vtime_task_switch(prev);
-	finish_arch_switch(prev);
 	perf_event_task_sched_in(prev, current);
 	finish_lock_switch(rq, prev);
 	finish_arch_post_lock_switch();
@@ -5267,19 +5266,6 @@ static u64 do_task_delta_exec(struct task_struct *p, struct rq *rq)
 		if ((s64)ns < 0)
 			ns = 0;
 	}
-
-	return ns;
-}
-
-unsigned long long task_delta_exec(struct task_struct *p)
-{
-	unsigned long flags;
-	struct rq *rq;
-	u64 ns = 0;
-
-	rq = task_rq_lock(p, &flags);
-	ns = do_task_delta_exec(p, rq);
-	task_rq_unlock(rq, p, &flags);
 
 	return ns;
 }
@@ -8287,8 +8273,7 @@ static void register_sched_domain_sysctl(void)
 /* may be called multiple times per register */
 static void unregister_sched_domain_sysctl(void)
 {
-	if (sd_sysctl_header)
-		unregister_sysctl_table(sd_sysctl_header);
+	unregister_sysctl_table(sd_sysctl_header);
 	sd_sysctl_header = NULL;
 	if (sd_ctl_dir[0].child)
 		sd_free_ctl_entry(&sd_ctl_dir[0].child);

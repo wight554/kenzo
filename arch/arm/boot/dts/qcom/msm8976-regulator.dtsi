@@ -226,8 +226,8 @@
 		status = "okay";
 		pm8950_l10: regulator-l10 {
 			regulator-min-microvolt = <2800000>;
-			regulator-max-microvolt = <2800000>;
-			qcom,init-voltage = <2800000>;
+			regulator-max-microvolt = <2950000>;
+			qcom,init-voltage = <2950000>;
 			status = "okay";
 		};
 	};
@@ -548,7 +548,7 @@
 				<4  1382400000>,
 				<5  1612800000>,
 				<6  1747200000>,
-				<7  1804800000>;
+				<7  1843200000>;
 		qcom,cpr-speed-bin-max-corners =
 				<0 0 2 4 6>,
 				<1 0 2 4 7>;

@@ -191,8 +191,8 @@ int sysctl_perf_event_sample_rate __read_mostly	= DEFAULT_MAX_SAMPLE_RATE;
 static int max_samples_per_tick __read_mostly	= DIV_ROUND_UP(DEFAULT_MAX_SAMPLE_RATE, HZ);
 static int perf_sample_period_ns __read_mostly	= DEFAULT_SAMPLE_PERIOD_NS;
 
-static atomic_t perf_sample_allowed_ns __read_mostly =
-	ATOMIC_INIT( DEFAULT_SAMPLE_PERIOD_NS * DEFAULT_CPU_TIME_MAX_PERCENT / 100);
+static int perf_sample_allowed_ns __read_mostly =
+	DEFAULT_SAMPLE_PERIOD_NS * DEFAULT_CPU_TIME_MAX_PERCENT / 100;
 
 void update_perf_cpu_limits(void)
 {
@@ -200,7 +200,7 @@ void update_perf_cpu_limits(void)
 
 	tmp *= sysctl_perf_cpu_time_max_percent;
 	do_div(tmp, 100);
-	atomic_set(&perf_sample_allowed_ns, tmp);
+	ACCESS_ONCE(perf_sample_allowed_ns) = tmp;
 }
 
 int perf_proc_update_handler(struct ctl_table *table, int write,
@@ -242,14 +242,15 @@ int perf_cpu_time_max_percent_handler(struct ctl_table *table, int write,
  * we detect that events are taking too long.
  */
 #define NR_ACCUMULATED_SAMPLES 128
-DEFINE_PER_CPU(u64, running_sample_length);
+static DEFINE_PER_CPU(u64, running_sample_length);
 
 void perf_sample_event_took(u64 sample_len_ns)
 {
 	u64 avg_local_sample_len;
 	u64 local_samples_len;
+	u64 allowed_ns = ACCESS_ONCE(perf_sample_allowed_ns);
 
-	if (atomic_read(&perf_sample_allowed_ns) == 0)
+	if (allowed_ns == 0)
 		return;
 
 	/* decay the counter by 1 average sample */
@@ -265,7 +266,7 @@ void perf_sample_event_took(u64 sample_len_ns)
 	 */
 	avg_local_sample_len = local_samples_len/NR_ACCUMULATED_SAMPLES;
 
-	if (avg_local_sample_len <= atomic_read(&perf_sample_allowed_ns))
+	if (avg_local_sample_len <= allowed_ns)
 		return;
 
 	if (max_samples_per_tick <= 1)
@@ -276,10 +277,9 @@ void perf_sample_event_took(u64 sample_len_ns)
 	perf_sample_period_ns = NSEC_PER_SEC / sysctl_perf_event_sample_rate;
 
 	printk_ratelimited(KERN_WARNING
-			"perf samples too long (%lld > %d), lowering "
+			"perf samples too long (%lld > %lld), lowering "
 			"kernel.perf_event_max_sample_rate to %d\n",
-			avg_local_sample_len,
-			atomic_read(&perf_sample_allowed_ns),
+			avg_local_sample_len, allowed_ns,
 			sysctl_perf_event_sample_rate);
 
 	update_perf_cpu_limits();
@@ -497,7 +497,6 @@ void perf_cgroup_switch(struct task_struct *task, int mode)
 	 * we reschedule only in the presence of cgroup
 	 * constrained events.
 	 */
-	rcu_read_lock();
 
 	list_for_each_entry_rcu(pmu, &pmus, entry) {
 		cpuctx = this_cpu_ptr(pmu->pmu_cpu_context);
@@ -539,8 +538,6 @@ void perf_cgroup_switch(struct task_struct *task, int mode)
 		}
 	}
 
-	rcu_read_unlock();
-
 	local_irq_restore(flags);
 }
 
@@ -550,6 +547,7 @@ static inline void perf_cgroup_sched_out(struct task_struct *task,
 	struct perf_cgroup *cgrp1;
 	struct perf_cgroup *cgrp2 = NULL;
 
+	rcu_read_lock();
 	/*
 	 * we come here when we know perf_cgroup_events > 0
 	 */
@@ -569,6 +567,8 @@ static inline void perf_cgroup_sched_out(struct task_struct *task,
 	 */
 	if (cgrp1 != cgrp2)
 		perf_cgroup_switch(task, PERF_CGROUP_SWOUT);
+
+	rcu_read_unlock();
 }
 
 static inline void perf_cgroup_sched_in(struct task_struct *prev,
@@ -577,6 +577,7 @@ static inline void perf_cgroup_sched_in(struct task_struct *prev,
 	struct perf_cgroup *cgrp1;
 	struct perf_cgroup *cgrp2 = NULL;
 
+	rcu_read_lock();
 	/*
 	 * we come here when we know perf_cgroup_events > 0
 	 */
@@ -592,6 +593,8 @@ static inline void perf_cgroup_sched_in(struct task_struct *prev,
 	 */
 	if (cgrp1 != cgrp2)
 		perf_cgroup_switch(task, PERF_CGROUP_SWIN);
+
+	rcu_read_unlock();
 }
 
 static inline int perf_cgroup_connect(int fd, struct perf_event *event,
@@ -1760,7 +1763,7 @@ group_sched_in(struct perf_event *group_event,
 	       struct perf_event_context *ctx)
 {
 	struct perf_event *event, *partial_group = NULL;
-	struct pmu *pmu = group_event->pmu;
+	struct pmu *pmu = ctx->pmu;
 	u64 now = ctx->time;
 	bool simulate = false;
 
@@ -7190,28 +7193,27 @@ SYSCALL_DEFINE5(perf_event_open,
 		if (group_leader->group_leader != group_leader)
 			goto err_context;
 		/*
-		 * Do not allow to attach to a group in a different
-		 * task or CPU context:
+		 * Make sure we're both events for the same CPU;
+		 * grouping events for different CPUs is broken; since
+		 * you can never concurrently schedule them anyhow.
 		 */
-		if (move_group) {
-			/*
-			 * Make sure we're both on the same task, or both
-			 * per-cpu events.
-			 */
-			if (group_leader->ctx->task != ctx->task)
-				goto err_context;
+		if (group_leader->cpu != event->cpu)
+			goto err_context;
 
-			/*
-			 * Make sure we're both events for the same CPU;
-			 * grouping events for different CPUs is broken; since
-			 * you can never concurrently schedule them anyhow.
-			 */
-			if (group_leader->cpu != event->cpu)
-				goto err_context;
-		} else {
-			if (group_leader->ctx != ctx)
-				goto err_context;
-		}
+		/*
+		 * Make sure we're both on the same task, or both
+		 * per-CPU events.
+		 */
+		if (group_leader->ctx->task != ctx->task)
+			goto err_context;
+
+		/*
+		 * Do not allow to attach to a group in a different task
+		 * or CPU context. If we're moving SW events, we'll fix
+		 * this up later, so allow that.
+		 */
+		if (!move_group && group_leader->ctx != ctx)
+			goto err_context;
 
 		/*
 		 * Only a group leader can be exclusive or pinned
@@ -8189,7 +8191,9 @@ static void perf_cgroup_css_free(struct cgroup *cont)
 static int __perf_cgroup_move(void *info)
 {
 	struct task_struct *task = info;
+	rcu_read_lock();
 	perf_cgroup_switch(task, PERF_CGROUP_SWOUT | PERF_CGROUP_SWIN);
+	rcu_read_unlock();
 	return 0;
 }
 
