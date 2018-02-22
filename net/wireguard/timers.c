@@ -150,7 +150,7 @@ void timers_handshake_initiated(struct wireguard_peer *peer)
 {
 	if (likely(timers_active(peer))) {
 		del_timer(&peer->timer_send_keepalive);
-		mod_timer(&peer->timer_retransmit_handshake, slack_time(jiffies + REKEY_TIMEOUT + prandom_u32_max(REKEY_TIMEOUT_JITTER_MAX)));
+		mod_timer(&peer->timer_retransmit_handshake, slack_time(jiffies + REKEY_TIMEOUT + prandom_u32_max_backport(REKEY_TIMEOUT_JITTER_MAX)));
 	}
 }
 

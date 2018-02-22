@@ -121,13 +121,16 @@ static inline void skb_reset_tc(struct sk_buff *skb)
 }
 #endif
 
+/*
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 11, 0)
 #include <linux/siphash.h>
 static inline u32 get_random_u32(void)
 {
 	static siphash_key_t key;
 	static u32 counter = 0;
+
 #if LINUX_VERSION_CODE < KERNEL_VERSION(4, 4, 0)
+
 	static bool has_seeded = false;
 	if (unlikely(!has_seeded)) {
 		get_random_bytes(&key, sizeof(key));
@@ -135,10 +138,12 @@ static inline u32 get_random_u32(void)
 	}
 #else
 	get_random_once(&key, sizeof(key));
+
 #endif
 	return siphash_2u32(counter++, get_random_int(), &key);
 }
 #endif
+*/
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0) && !defined(ISRHEL7)
 static inline void netif_keep_dst(struct net_device *dev)
@@ -209,6 +214,7 @@ static inline void skb_scrub_packet(struct sk_buff *skb, bool xnet)
 }
 #endif
 
+/*
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 12, 0) || defined(ISUBUNTU1404)) && !defined(ISRHEL7)
 #include <linux/random.h>
 static inline u32 prandom_u32_max(u32 ep_ro)
@@ -216,6 +222,7 @@ static inline u32 prandom_u32_max(u32 ep_ro)
 	return (u32)(((u64) prandom_u32() * ep_ro) >> 32);
 }
 #endif
+*/
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(3, 10, 75) && !defined(ISRHEL7)
 #ifndef U8_MAX
@@ -271,7 +278,7 @@ static const struct in6_addr our_in6addr_any = IN6ADDR_ANY_INIT;
 #define in6addr_any our_in6addr_any
 #endif
 
-#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0) && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4, 13, 0) // && LINUX_VERSION_CODE >= KERNEL_VERSION(4, 2, 0)
 #include <linux/completion.h>
 #include <linux/random.h>
 #include <linux/errno.h>
