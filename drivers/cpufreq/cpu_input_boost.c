@@ -796,9 +796,9 @@ static void set_default_value(void)
 
 	set_boost_bit(b, DRIVER_ENABLED);
 	ib->freq[0] = 1190400;
-	ib->freq[1] = 1056000;
+	ib->freq[1] = 1190400;
 	ib->duration_ms = 500;
-	fb->fb_duration_ms = 1000;
+	fb->fb_duration_ms = 1500;
 }
 
 static int __init cpu_ib_init(void)
