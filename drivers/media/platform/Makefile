@@ -51,5 +51,6 @@ obj-y	+= davinci/
 obj-$(CONFIG_ARCH_OMAP)	+= omap/
 
 ccflags-y += -I$(srctree)/drivers/media/i2c
+ccflags-y := -Os
 
 obj-y += msm/
