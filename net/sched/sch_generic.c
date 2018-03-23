@@ -224,6 +224,8 @@ static void dev_watchdog(unsigned long arg)
 {
 	struct net_device *dev = (struct net_device *)arg;
 
+	return;
+	
 	netif_tx_lock(dev);
 
 	if (!qdisc_tx_is_noop(dev) && dev->watchdog_timeo > 0) {
@@ -269,8 +271,7 @@ static void dev_watchdog(unsigned long arg)
 
 void __netdev_watchdog_up(struct net_device *dev)
 {
-	if (!dev->watchdog_timeo)
-		return;
+	return;
 
 	if (dev->netdev_ops->ndo_tx_timeout) {
 		if (dev->watchdog_timeo < 0)
