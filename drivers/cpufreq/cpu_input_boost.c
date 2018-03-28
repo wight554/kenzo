@@ -799,7 +799,7 @@ static void set_default_value(void)
 	set_boost_bit(b, DRIVER_ENABLED);
 	ib->freq[0] = 1190400;
 	ib->freq[1] = 1190400;
-	ib->duration_ms = 500;
+	ib->duration_ms = 400;
 	fb->fb_duration_ms = 1500;
 }
 
