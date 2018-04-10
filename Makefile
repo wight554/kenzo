@@ -596,12 +596,12 @@ KBUILD_CFLAGS	+= $(call cc-option,--param=allow-store-data-races=0)
 ifdef CONFIG_CC_OPTIMIZE_FOR_SIZE
 KBUILD_CFLAGS	+= -Os
 else
-KBUILD_CFLAGS	+= -O2 -finline-functions
+KBUILD_CFLAGS	+= -O2
 endif
 
-###########################
-# FLASH OPTMIZATION SETUP #
-###########################
+#####################
+# OPTMIZATION SETUP #
+#####################
 
 KBUILD_CFLAGS	+= -O2 -g0 -DNDEBUG \
 		   -fgraphite \
@@ -613,6 +613,7 @@ KBUILD_CFLAGS	+= -O2 -g0 -DNDEBUG \
 		   -fmodulo-sched \
 		   -fmodulo-sched-allow-regmoves \
 		   -fomit-frame-pointer \
+		   -fpeel-loops \
 		   -ftree-loop-distribution \
 		   -ftree-loop-linear
 
