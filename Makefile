@@ -604,18 +604,11 @@ endif
 #####################
 
 KBUILD_CFLAGS	+= -O2 -g0 -DNDEBUG \
-		   -fgraphite \
- 		   -fgraphite-identity \
 		   -fivopts \
-		   -floop-block \
-		   -floop-interchange \
-		   -floop-strip-mine \
 		   -fmodulo-sched \
 		   -fmodulo-sched-allow-regmoves \
 		   -fomit-frame-pointer \
 		   -fpeel-loops \
-		   -ftree-loop-distribution \
-		   -ftree-loop-linear
 
 # Strip linker
 LDFLAGS		+= --strip-debug -O2
