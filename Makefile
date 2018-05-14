@@ -376,7 +376,7 @@ LINUXINCLUDE    := \
 
 KBUILD_CPPFLAGS := -D__KERNEL__
 
-KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs -Wno-maybe-uninitialized \
+KBUILD_CFLAGS   := -Wall -Wundef -Wstrict-prototypes -Wno-trigraphs \
 		   -fno-strict-aliasing -fno-common \
 		   -Werror-implicit-function-declaration \
 		   -g0 -DNDEBUG -fmodulo-sched -fivopts \
@@ -622,9 +622,6 @@ KBUILD_CFLAGS	+= $(call cc-disable-warning,unused-const-variable,)
 
 # Disable format-truncation warnings
 KBUILD_CFLAGS   += $(call cc-disable-warning,format-truncation,)
-
-# Kill all maybe-uninitialized warnings
-KBUILD_CFLAGS	+= $(call cc-disable-warning,maybe-uninitialized,)
 
 # Disable all buggy detection warnings
 KBUILD_CFLAGS   += $(call cc-disable-warning,incompatible-pointer-types,)
