@@ -1377,6 +1377,16 @@ static LIST_HEAD(related_thread_groups);
 static DEFINE_SPINLOCK(related_thread_group_lock);
 static int nr_related_thread_groups;
 
+static const struct cpumask *get_adjusted_cpumask(const struct task_struct *p,
+	const struct cpumask *req_mask)
+{
+	/* Force all performance-critical kthreads onto the big cluster */
+	if (p->flags & PF_PERF_CRITICAL)
+		return cpu_perf_mask;
+
+	return req_mask;
+}
+
 /* Return cluster which can offer required capacity for group */
 static struct sched_cluster *
 best_cluster(struct related_thread_group *grp, u64 total_demand)
@@ -7988,11 +7998,14 @@ out:
 #ifdef CONFIG_SMP
 void do_set_cpus_allowed(struct task_struct *p, const struct cpumask *new_mask)
 {
+	new_mask = get_adjusted_cpumask(p, new_mask);
+
 	if (p->sched_class->set_cpus_allowed)
 		p->sched_class->set_cpus_allowed(p, new_mask);
 
 	cpumask_copy(&p->cpus_allowed, new_mask);
 	p->nr_cpus_allowed = cpumask_weight(new_mask);
+
 }
 
 /*
@@ -8024,6 +8037,8 @@ int set_cpus_allowed_ptr(struct task_struct *p, const struct cpumask *new_mask)
 	struct rq *rq;
 	unsigned int dest_cpu;
 	int ret = 0;
+
+	new_mask = get_adjusted_cpumask(p, new_mask);
 
 	rq = task_rq_lock(p, &flags);
 
