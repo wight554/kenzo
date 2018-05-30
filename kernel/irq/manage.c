@@ -983,7 +983,7 @@ static void add_desc_to_perf_list(struct irq_desc *desc)
 	unsigned long flags;
 
 	item = kmalloc(sizeof(*item), GFP_ATOMIC);
-	if (!item)
+	if (WARN_ON(!item))
 		return;
 
 	item->desc = desc;
@@ -1281,6 +1281,7 @@ __setup_irq(unsigned int irq, struct irq_desc *desc, struct irqaction *new)
 		/* Set default affinity mask once everything is setup */
 		if (new->flags & IRQF_PERF_CRITICAL) {
 			add_desc_to_perf_list(desc);
+			irqd_set(&desc->irq_data, IRQD_AFFINITY_MANAGED);
 			irq_set_affinity_locked(&desc->irq_data,
 				cpu_perf_mask, true);
 		} else {
